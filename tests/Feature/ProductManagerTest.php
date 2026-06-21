@@ -174,4 +174,173 @@ class ProductManagerTest extends TestCase
             ->assertSee('Apple')
             ->assertDontSee('Banana');
     }
+
+    public function test_stock_logs_are_created_on_product_create_and_update()
+    {
+        $user = User::factory()->create();
+        $category = Category::first();
+
+        // 1. Test creation log
+        Livewire::actingAs($user)
+            ->test(\App\Livewire\ProductManager::class)
+            ->set('category_id', $category->id)
+            ->set('name', 'Logged Product')
+            ->set('stock', 15)
+            ->set('purchase_price', 100)
+            ->set('selling_price', 150)
+            ->call('store')
+            ->assertHasNoErrors();
+
+        $product = Product::where('name', 'Logged Product')->first();
+        $this->assertNotNull($product);
+
+        $this->assertDatabaseHas('stock_logs', [
+            'product_id' => $product->id,
+            'user_id' => $user->id,
+            'type' => 'masuk',
+            'quantity' => 15,
+            'reason' => 'Stok Awal Produk',
+        ]);
+
+        // 2. Test edit increase (Restock)
+        Livewire::actingAs($user)
+            ->test(\App\Livewire\ProductManager::class)
+            ->call('edit', $product->id)
+            ->set('stock', 25) // increase by 10
+            ->call('store')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('stock_logs', [
+            'product_id' => $product->id,
+            'user_id' => $user->id,
+            'type' => 'masuk',
+            'quantity' => 10,
+            'reason' => 'Restock',
+        ]);
+
+        // 3. Test edit decrease (Koreksi Stok)
+        Livewire::actingAs($user)
+            ->test(\App\Livewire\ProductManager::class)
+            ->call('edit', $product->id)
+            ->set('stock', 20) // decrease by 5
+            ->call('store')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('stock_logs', [
+            'product_id' => $product->id,
+            'user_id' => $user->id,
+            'type' => 'keluar',
+            'quantity' => 5,
+            'reason' => 'Koreksi Stok',
+        ]);
+    }
+
+    public function test_low_stock_filter_and_badge()
+    {
+        $user = User::factory()->create();
+        $category = Category::first();
+
+        // 1. Create a product with normal stock
+        $normalProduct = Product::create([
+            'category_id' => $category->id,
+            'name' => 'Normal Stock Product',
+            'stock' => 10,
+            'purchase_price' => 100,
+            'selling_price' => 150,
+        ]);
+
+        // 2. Create a product with low stock (<= 4)
+        $lowProduct = Product::create([
+            'category_id' => $category->id,
+            'name' => 'Low Stock Product',
+            'stock' => 3,
+            'purchase_price' => 100,
+            'selling_price' => 150,
+        ]);
+
+        // 3. Test filter off (both should be visible, and low stock should have alert text)
+        Livewire::actingAs($user)
+            ->test(\App\Livewire\ProductManager::class)
+            ->assertSee('Normal Stock Product')
+            ->assertSee('Low Stock Product')
+            ->assertSee('3 (Stok Menipis)')
+            // 4. Test filter on (only low stock should be visible)
+            ->set('showLowStock', true)
+            ->assertSee('Low Stock Product')
+            ->assertDontSee('Normal Stock Product');
+    }
+
+    public function test_product_expiry_dates_and_badges()
+    {
+        $user = User::factory()->create();
+        $category = Category::first();
+
+        // 1. Test creation with expired_at
+        Livewire::actingAs($user)
+            ->test(\App\Livewire\ProductManager::class)
+            ->set('category_id', $category->id)
+            ->set('name', 'Expired product soon')
+            ->set('stock', 10)
+            ->set('purchase_price', 100)
+            ->set('selling_price', 150)
+            ->set('expired_at', today()->addDays(15)->format('Y-m-d'))
+            ->call('store')
+            ->assertHasNoErrors();
+
+        $product = Product::where('name', 'Expired product soon')->first();
+        $this->assertNotNull($product);
+        $this->assertEquals(today()->addDays(15)->format('Y-m-d'), $product->expired_at->format('Y-m-d'));
+
+        // 2. Test visual rendering in Livewire
+        // Create an already expired product
+        Product::create([
+            'category_id' => $category->id,
+            'name' => 'Past Expiry Product',
+            'stock' => 10,
+            'purchase_price' => 100,
+            'selling_price' => 150,
+            'expired_at' => today()->subDays(5),
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(\App\Livewire\ProductManager::class)
+            ->assertSee('Expired product soon')
+            ->assertSee('Hampir Expired')
+            ->assertSee('Past Expiry Product')
+            ->assertSee('KEDALUWARSA');
+    }
+
+    public function test_dashboard_summary_indicators()
+    {
+        $user = User::factory()->create();
+        $category = Category::first();
+
+        // 1. Create two products with varied stock and prices
+        Product::create([
+            'category_id' => $category->id,
+            'name' => 'Prod A',
+            'stock' => 10,
+            'purchase_price' => 1000,
+            'selling_price' => 1500,
+        ]);
+
+        Product::create([
+            'category_id' => $category->id,
+            'name' => 'Prod B',
+            'stock' => 5,
+            'purchase_price' => 2000,
+            'selling_price' => 3000,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(\App\Livewire\ProductManager::class)
+            ->assertViewHas('totalProducts', 2)
+            ->assertViewHas('totalStock', 15)
+            ->assertViewHas('totalAsset', 20000)
+            ->assertViewHas('totalProfit', 10000)
+            ->assertSee('2')
+            ->assertSee('15')
+            ->assertSee('Rp 20.000')
+            ->assertSee('Rp 10.000');
+    }
 }

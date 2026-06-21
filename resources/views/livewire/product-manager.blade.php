@@ -19,6 +19,61 @@
             </div>
         </div>
 
+        <!-- Summary Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <!-- Card 1: Total Varian Produk -->
+            <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between hover:shadow transition duration-200">
+                <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Varian Produk</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ $totalProducts }}</p>
+                </div>
+                <div class="p-3 bg-indigo-50 text-indigo-600 rounded-lg">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Card 2: Total Stok Keseluruhan -->
+            <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between hover:shadow transition duration-200">
+                <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Stok Produk</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">{{ $totalStock }}</p>
+                </div>
+                <div class="p-3 bg-amber-50 text-amber-600 rounded-lg">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m6-15 2.25-2.25m0 0 2.25 2.25m-2.25-2.25v13.5" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Card 3: Total Nilai Aset Modal -->
+            <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between hover:shadow transition duration-200">
+                <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Nilai Aset Modal</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1">Rp {{ number_format($totalAsset, 0, ',', '.') }}</p>
+                </div>
+                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Card 4: Total Potensi Profit -->
+            <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between hover:shadow transition duration-200">
+                <div>
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Potensi Profit</p>
+                    <p class="text-2xl font-bold text-indigo-600 mt-1">Rp {{ number_format($totalProfit, 0, ',', '.') }}</p>
+                </div>
+                <div class="p-3 bg-rose-50 text-rose-600 rounded-lg">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
         <!-- Success Flash Message -->
         @if (session()->has('message'))
             <div 
@@ -42,7 +97,7 @@
         @endif
 
         <!-- Filter & Search Section -->
-        <div class="mb-6 bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col md:flex-row items-center gap-4">
+        <div class="mb-6 bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col md:flex-row items-center gap-6">
             <div class="relative w-full md:w-96">
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -56,12 +111,26 @@
                     class="block w-full pl-10 pr-3 py-2 border border-gray-250 rounded-lg text-sm bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all placeholder-gray-400"
                 />
             </div>
-            @if($search)
+            
+            <!-- Quick Filter: Low Stock -->
+            <label class="inline-flex items-center cursor-pointer select-none">
+                <input 
+                    type="checkbox" 
+                    wire:model.live="showLowStock" 
+                    class="rounded border-gray-355 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                />
+                <span class="ml-2 text-sm text-gray-700 font-semibold flex items-center gap-1.5">
+                    <span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+                    Stok Menipis (stok < 5)
+                </span>
+            </label>
+
+            @if($search || $showLowStock)
                 <button 
-                    wire:click="$set('search', '')" 
-                    class="text-sm text-gray-500 hover:text-indigo-600 font-medium transition"
+                    wire:click="$set('search', ''); $set('showLowStock', false);" 
+                    class="text-sm text-gray-500 hover:text-indigo-650 font-semibold transition"
                 >
-                    Clear Search
+                    Reset Filter
                 </button>
             @endif
         </div>
@@ -79,6 +148,7 @@
                             <th class="py-4 px-6 text-center">Stok</th>
                             <th class="py-4 px-6 text-right">Harga Beli</th>
                             <th class="py-4 px-6 text-right">Harga Jual</th>
+                            <th class="py-4 px-6 text-center">Kedaluwarsa</th>
                             <th class="py-4 px-6 text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -96,15 +166,45 @@
                                     {{ $product->description ?: '-' }}
                                 </td>
                                 <td class="py-4 px-6 text-center">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $product->stock > 10 ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800' }}">
-                                        {{ $product->stock }}
-                                    </span>
+                                    @if($product->stock <= 4)
+                                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200 animate-pulse">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                            {{ $product->stock }} (Stok Menipis)
+                                        </span>
+                                    @elseif($product->stock <= 10)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-100">
+                                            {{ $product->stock }}
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-100/50">
+                                            {{ $product->stock }}
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="py-4 px-6 text-right font-medium text-gray-600">
                                     Rp {{ number_format($product->purchase_price, 0, ',', '.') }}
                                 </td>
                                 <td class="py-4 px-6 text-right font-medium text-indigo-600">
                                     Rp {{ number_format($product->selling_price, 0, ',', '.') }}
+                                </td>
+                                <td class="py-4 px-6 text-center">
+                                    @if($product->expired_at)
+                                        @if($product->expired_at->lt(today()))
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200 animate-pulse" title="{{ $product->expired_at->format('d M Y') }}">
+                                                KEDALUWARSA
+                                            </span>
+                                        @elseif($product->expired_at->between(today(), today()->addDays(30)))
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200" title="{{ $product->expired_at->format('d M Y') }}">
+                                                Hampir Expired
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-100/50">
+                                                {{ $product->expired_at->format('d M Y') }}
+                                            </span>
+                                        @endif
+                                    @else
+                                        <span class="text-gray-400 font-mono">-</span>
+                                    @endif
                                 </td>
                                 <td class="py-4 px-6 text-center">
                                     <div class="flex items-center justify-center gap-2">
@@ -251,6 +351,20 @@
                             class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm @error('description') border-rose-300 focus:border-rose-500 focus:ring-rose-500 @enderror"
                         ></textarea>
                         @error('description')
+                            <span class="text-rose-600 text-xs mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <!-- Expiry Date -->
+                    <div>
+                        <label for="expired_at" class="block text-sm font-semibold text-gray-700 mb-1">Tanggal Kedaluwarsa</label>
+                        <input 
+                            type="date" 
+                            wire:model="expired_at" 
+                            id="expired_at" 
+                            class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm @error('expired_at') border-rose-300 focus:border-rose-500 focus:ring-rose-500 @enderror"
+                        />
+                        @error('expired_at')
                             <span class="text-rose-600 text-xs mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>

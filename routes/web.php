@@ -16,4 +16,8 @@ Route::get('products', \App\Livewire\ProductManager::class)
     ->middleware(['auth', 'verified'])
     ->name('products');
 
+Route::get('stock-logs', \App\Livewire\StockLogIndex::class)
+    ->middleware(['auth', 'verified'])
+    ->name('stock-logs');
+
 require __DIR__.'/auth.php';
