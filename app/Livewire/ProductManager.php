@@ -198,6 +198,12 @@ class ProductManager extends Component
         session()->flash('message', 'Produk berhasil dihapus!');
     }
 
+    public function logout(\App\Livewire\Actions\Logout $logout)
+    {
+        $logout();
+        $this->redirect('/', navigate: true);
+    }
+
     public function render()
     {
         $query = Product::with('category')
@@ -207,7 +213,7 @@ class ProductManager extends Component
             $query->where('stock', '<', 5);
         }
 
-        $products = $query->latest()->paginate(10);
+        $products = $query->orderBy('id', 'asc')->paginate(10);
 
         $categories = Category::all();
 
